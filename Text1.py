@@ -40,19 +40,20 @@ choice = st.sidebar.selectbox("Выберите язык перевода:", lis
 # 4. Основное окно
 input_text = st.text_area("Вставь текст здесь:", "High-level translator of language by general-purpose.")
 
-    # Просто запускаем цикл — кнопки сами выстроятся в ряд благодаря CSS выше
-      if input_text:
-          words = input_text.split()  # ТУТ ОТСТУП
-          st.write("---")             # ТУТ ОТСТУП
+if input_text:
+    # Эти строки должны быть сдвинуты вправо (4 пробела)
+    words = input_text.split()
+    st.write("---")
     
-        # 5. Самый важный цикл: выводим слова БЕЗ колонок
-         for i, word in enumerate(words):
-            if st.button(word, key=f"btn_{i}"):
-                clean_word = word.strip(".,!?;:()")
-                # Переводим на выбранный язык
-                translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
-                st.sidebar.success(f"**{clean_word}** = {translation}")
+    # Весь цикл for ТОЖЕ должен быть сдвинут вправо (4 пробела)
+    for i, word in enumerate(words):
+        if st.button(word, key=f"btn_{i}"):
+            clean_word = word.strip(".,!?;:()")
+            # Переводим на выбранный язык
+            translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
+            st.sidebar.success(f"**{clean_word}** = {translation}")
 
+# Эта строка стоит у края, она вне условия if
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
 
 
