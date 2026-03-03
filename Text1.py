@@ -42,7 +42,10 @@ input_text = st.text_area("Вставь текст здесь:", "High-level tra
 
 if input_text:
     words = input_text.split()
-    st.write("---")
+    # Просто запускаем цикл — кнопки сами выстроятся в ряд благодаря CSS выше
+    for i, word in enumerate(words):
+        if st.button(word, key=f"btn_{i}"):
+            # логика перевода...
     
     # 5. Самый важный цикл: выводим слова БЕЗ колонок
     for i, word in enumerate(words):
@@ -53,6 +56,7 @@ if input_text:
             st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
