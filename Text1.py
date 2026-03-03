@@ -53,24 +53,38 @@ choice = st.sidebar.selectbox("Выберите язык перевода:", lis
 input_text = st.text_area("Вставь текст здесь:", "High-level translator of language by general-purpose.")
 
 if input_text:
-    # Эти строки должны быть сдвинуты вправо (4 пробела)
     words = input_text.split()
     st.write("---")
     
-    # 5. Выводим слова в ряд (План Б)
-    # Создаем контейнер, который заставит всё внутри идти слева направо
-    st.markdown('<div style="display: flex; flex-wrap: wrap; align-items: baseline;">', unsafe_allow_html=True)
+    # Создаем контейнер для слов
+    # Вместо одной колонки на слово, используем магию "unsafe_allow_html" для текста
+    # Но чтобы сохранить кликабельность каждой кнопки, попробуем этот хак:
     
+    cols = st.columns(len(words))
     for i, word in enumerate(words):
-        if st.button(word, key=f"btn_{i}"):
-            clean_word = word.strip(".,!?;:()")
-            translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
-            st.sidebar.success(f"**{clean_word}** = {translation}")
+        with cols[i]:
+            # Убираем все отступы у колонок через этот стиль прямо тут
+            st.markdown("""
+                <style>
+                [data-testid="column"] {
+                    width: auto !important;
+                    flex: none !important;
+                    padding: 0 !important;
+                    margin: 0 -2px !important;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+            
+            if st.button(word, key=f"word_{i}"):
+                clean_word = word.strip(".,!?;:()")
+                translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
+                st.sidebar.success(f"**{clean_word}** = {translation}")v
             
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Эта строка стоит у края, она вне условия if
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
