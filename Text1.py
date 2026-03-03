@@ -1,22 +1,26 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
-# Заголовок страницы
-st.title("🌍 Мой личный Переводчик")
-st.subheader("Made by VvodySliuni")
+st.title("Interactive Word Translator 🖱️")
+st.subheader("Нажми на слово, чтобы узнать перевод")
 
-# Окно для ввода текста
-text_to_translate = st.text_area("Введите текст на английском:", "Hello, how are you?")
+# 1. Поле для ввода большого куска текста
+input_text = st.text_area("Вставь текст на английском сюда:", "Learning Python is fun and easy")
 
-# Кнопка для перевода
-if st.button("Перевести"):
-    if text_to_translate:
-        # Логика перевода
-        translated = GoogleTranslator(source='auto', target='ru').translate(text_to_translate)
-        
-        # Вывод результата в красивой рамке
-        st.success(f"Результат: {translated}")
-    else:
-        st.warning("Сначала введите текст!")
-
-st.info("Это приложение работает на твоем компьютере как локальный сайт.")
+if input_text:
+    # 2. Разделяем текст на слова
+    words = input_text.split()
+    
+    st.write("---")
+    st.write("### Твой текст (нажимай на слова):")
+    
+    # Создаем контейнер, чтобы кнопки шли друг за другом, а не в столбик
+    cols = st.container()
+    
+    # 3. Создаем кнопки для каждого слова
+    # Мы используем уникальный ключ для каждой кнопки, чтобы Streamlit не путался
+    for index, word in enumerate(words):
+        if st.button(word, key=f"word_{index}"):
+            # 4. Перевод конкретного слова при нажатии
+            translation = GoogleTranslator(source='auto', target='ru').translate(word)
+            st.info(f"**{word}** — это: **{translation}**")
