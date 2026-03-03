@@ -10,23 +10,35 @@ langs = {k.capitalize(): v for k, v in langs_dict.items()}
 # 2. Настройка стилей (CSS)
 st.markdown("""
     <style>
-    /* Уплотняем кнопки в одну строку */
+    /* ПРИНУДИТЕЛЬНО делаем контейнеры кнопок маленькими */
     div.stButton {
         display: inline-block !important;
-        margin-right: -8px !important;
+        width: auto !important;
+        margin-right: -4px !important; /* Еще плотнее */
     }
-    /* Делаем их похожими на текст */
+    
+    /* Убираем стандартные отступы Streamlit для кнопок */
     div.stButton > button {
         border: none;
-        padding: 0px 4px !important;
+        padding: 0px 2px !important;
         background-color: transparent;
         color: inherit;
         font-size: 18px;
         vertical-align: baseline;
+        width: auto !important; /* Чтобы кнопка не была на всю строку */
     }
+
     div.stButton > button:hover {
         color: #ff4b4b;
-        background-color: transparent;
+    }
+    
+    /* Убираем лишние отступы между колонками, если они остались */
+    [data-testid="column"] {
+        width: auto !important;
+        flex: none !important;
+    }
+    [data-testid="stHorizontalBlock"] {
+        gap: 0px !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -59,6 +71,7 @@ if input_text:
 
 # Эта строка стоит у края, она вне условия if
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
