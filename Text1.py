@@ -10,30 +10,30 @@ langs = {k.capitalize(): v for k, v in langs_dict.items()}
 # 2. Настройка стилей (CSS)
 st.markdown("""
     <style>
-    /* 1. Заставляем колонки сжиматься до размера текста */
+    /* 1. Заставляем каждую колонку сжиматься под размер слова */
     [data-testid="column"] {
         width: auto !important;
         flex: none !important;
         padding-left: 0px !important;
-        padding-right: 5px !important; /* Расстояние между словами */
+        padding-right: 2px !important; /* Узкий пробел между словами */
     }
-    
-    /* 2. Убираем стандартные отступы контейнера колонок */
+
+    /* 2. Убираем стандартные отступы самого контейнера колонок */
     [data-testid="stHorizontalBlock"] {
         gap: 0px !important;
         justify-content: flex-start !important;
     }
 
-    /* 3. Делаем кнопки похожими на обычный текст */
+    /* 3. Делаем кнопки невидимыми (как обычный текст) */
     div.stButton > button {
         border: none;
-        padding: 0px !important;
+        padding: 0px 2px !important;
         background-color: transparent;
         color: inherit;
         font-size: 18px;
         vertical-align: baseline;
     }
-    
+
     div.stButton > button:hover {
         color: #ff4b4b;
         background-color: transparent;
@@ -67,6 +67,7 @@ if input_text:
                 st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
