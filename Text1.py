@@ -45,15 +45,16 @@ input_text = st.text_area("Вставь текст здесь:", "High-level tra
           words = input_text.split()  # ТУТ ОТСТУП
           st.write("---")             # ТУТ ОТСТУП
     
-    # 5. Самый важный цикл: выводим слова БЕЗ колонок
-     for i, word in enumerate(words):
-        if st.button(word, key=f"btn_{i}"):
-            clean_word = word.strip(".,!?;:()")
-            # Переводим на выбранный язык
-            translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
-            st.sidebar.success(f"**{clean_word}** = {translation}")
+        # 5. Самый важный цикл: выводим слова БЕЗ колонок
+         for i, word in enumerate(words):
+            if st.button(word, key=f"btn_{i}"):
+                clean_word = word.strip(".,!?;:()")
+                # Переводим на выбранный язык
+                translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
+                st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
