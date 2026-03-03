@@ -23,11 +23,12 @@ if input_text:
         # Чистим слово от знаков препинания для точного перевода
         clean_word = word.strip(".,!?;:()")
         
-        if st.button(word, key=f"w_{index}", help="Нажми, чтобы перевести"):
+        if st.button(word, key=f"w_{index}", help="Наведи, чтобы перевести"):
             translation = GoogleTranslator(source='auto', target='ru').translate(clean_word)
             st.sidebar.info(f"**{clean_word}** -> {translation}")
 
 st.sidebar.title("Словарь текущей сессии")
 st.sidebar.write("Здесь будут появляться переводы нажатых слов.")
+
 
 
