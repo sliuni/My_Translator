@@ -1,5 +1,6 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
+languages = {"Русский": "ru", "Немецкий": "de", "Французский": "fr", "Испанский": "es"}
 
 # Настройка стилей, чтобы кнопки выглядели как обычный текст
 st.markdown("""
@@ -20,8 +21,10 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.title("Smart Reading 📖")
+# Создаем выпадающий список в боковой панели
+choice = st.sidebar.selectbox("Выберите язык:", list(langs.keys()))
 
-input_text = st.text_area("Вставь текст здесь:", "Python is an interpreted high-level general-purpose programming language.")
+input_text = st.text_area("Вставь текст здесь:", "High-level translater of language by general-purpose.")
 
 if input_text:
     words = input_text.split()
@@ -43,7 +46,8 @@ if input_text:
         with cols[i % len(cols)]: # Это заставит их идти в ряд
             if st.button(word, key=f"btn_{i}"):
                 clean_word = word.strip(".,!?;:()")
-                translation = GoogleTranslator(source='auto', target='ru').translate(clean_word)
+                translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
                 st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод здесь.")
+
