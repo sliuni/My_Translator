@@ -56,26 +56,20 @@ if input_text:
     words = input_text.split()
     st.write("---")
     
-    # План «Монолит»: Оборачиваем все кнопки в один flex-контейнер
-    # Это заставит их идти друг за другом и переноситься как обычный текст
-    st.markdown('<div style="display: flex; flex-wrap: wrap; gap: 0px; align-items: baseline;">', unsafe_allow_html=True)
+    # ТОТ САМЫЙ ПЕРВЫЙ ВАРИАНТ:
+    # Создаем сетку колонок по количеству слов
+    cols = st.columns(len(words) if len(words) > 0 else 1)
     
-    # Создаем область, где кнопки будут выводиться в ряд
-    container = st.container()
-    with container:
-        # Важно: просто выводим кнопки одну за другой БЕЗ колонок
-        for i, word in enumerate(words):
-            if st.button(word, key=f"word_{i}"):
+    for i, word in enumerate(words):
+        with cols[i]:
+            if st.button(word, key=f"btn_{i}"):
                 clean_word = word.strip(".,!?;:()")
+                # Перевод на выбранный язык
                 translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
                 st.sidebar.success(f"**{clean_word}** = {translation}")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-            
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# Эта строка стоит у края, она вне условия if
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
