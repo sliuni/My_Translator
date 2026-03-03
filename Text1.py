@@ -1,6 +1,6 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
-languages = {"Русский": "ru", "Немецкий": "de", "Французский": "fr", "Испанский": "es"}
+langs = {"Русский": "ru", "Немецкий": "de", "Французский": "fr", "Испанский": "es"}
 
 # Настройка стилей, чтобы кнопки выглядели как обычный текст
 st.markdown("""
@@ -50,4 +50,5 @@ if input_text:
                 st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод здесь.")
+
 
