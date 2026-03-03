@@ -40,9 +40,6 @@ choice = st.sidebar.selectbox("Выберите язык перевода:", lis
 # 4. Основное окно
 input_text = st.text_area("Вставь текст здесь:", "High-level translator of language by general-purpose.")
 
-if input_text:
-    words = input_text.split()   
-    
     # Просто запускаем цикл — кнопки сами выстроятся в ряд благодаря CSS выше
       if input_text:
          words = input_text.split()  # ТУТ ОТСТУП
@@ -57,6 +54,7 @@ if input_text:
             st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
