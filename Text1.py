@@ -1,34 +1,49 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
-st.title("Reading Mode 📖")
-st.subheader("Наведи на слово или нажми, чтобы перевести")
+# Настройка стилей, чтобы кнопки выглядели как обычный текст
+st.markdown("""
+    <style>
+    div.stButton > button {
+        border: none;
+        padding: 0px 2px;
+        background-color: transparent;
+        color: inherit;
+        font-size: 18px;
+        vertical-align: baseline;
+    }
+    div.stButton > button:hover {
+        color: #ff4b4b;
+        background-color: transparent;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# Ввод текста
-input_text = st.text_area("Вставь текст:", "Python is a powerful programming language.")
+st.title("Smart Reading 📖")
+
+input_text = st.text_area("Вставь текст здесь:", "Python is an interpreted high-level general-purpose programming language.")
 
 if input_text:
     words = input_text.split()
     
-    # Создаем пустую строку для нашего "умного" текста
-    annotated_text = ""
-    
     st.write("---")
     
-    # Рисуем интерфейс: каждое слово — это ссылка, которая не уводит на другой сайт,
-    # а просто реагирует на нажатие внутри Streamlit
-    cols = st.columns(len(words) if len(words) < 10 else 10) # Ограничим колонки для красоты
+    # Создаем область, где слова будут выстраиваться в строку
+    # Используем unsafe_allow_html для гибкой верстки
+    t_container = st.container()
     
-    for index, word in enumerate(words):
-        # Чистим слово от знаков препинания для точного перевода
-        clean_word = word.strip(".,!?;:()")
-        
-        if st.button(word, key=f"w_{index}", help="Наведи, чтобы перевести"):
-            translation = GoogleTranslator(source='auto', target='ru').translate(clean_word)
-            st.sidebar.info(f"**{clean_word}** -> {translation}")
+    # Выводим слова в одну строку (флекс-контейнер)
+    html_string = "<div style='display: flex; flex-wrap: wrap; gap: 5px; line-height: 2;'>"
+    
+    # В Streamlit кнопки всегда создают новый элемент, 
+    # поэтому мы используем колонки или специальную верстку
+    cols = st.columns(len(words) if len(words) > 0 else 1)
+    
+    for i, word in enumerate(words):
+        with cols[i % len(cols)]: # Это заставит их идти в ряд
+            if st.button(word, key=f"btn_{i}"):
+                clean_word = word.strip(".,!?;:()")
+                translation = GoogleTranslator(source='auto', target='ru').translate(clean_word)
+                st.sidebar.success(f"**{clean_word}** = {translation}")
 
-st.sidebar.title("Словарь текущей сессии")
-st.sidebar.write("Здесь будут появляться переводы нажатых слов.")
-
-
-
+st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод здесь.")
