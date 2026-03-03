@@ -56,34 +56,27 @@ if input_text:
     words = input_text.split()
     st.write("---")
     
-    # Создаем контейнер для слов
-    # Вместо одной колонки на слово, используем магию "unsafe_allow_html" для текста
-    # Но чтобы сохранить кликабельность каждой кнопки, попробуем этот хак:
+    # План «Монолит»: Оборачиваем все кнопки в один flex-контейнер
+    # Это заставит их идти друг за другом и переноситься как обычный текст
+    st.markdown('<div style="display: flex; flex-wrap: wrap; gap: 0px; align-items: baseline;">', unsafe_allow_html=True)
     
-    cols = st.columns(len(words))
-    for i, word in enumerate(words):
-        with cols[i]:
-            # Убираем все отступы у колонок через этот стиль прямо тут
-            st.markdown("""
-                <style>
-                [data-testid="column"] {
-                    width: auto !important;
-                    flex: none !important;
-                    padding: 0 !important;
-                    margin: 0 -2px !important;
-                }
-                </style>
-            """, unsafe_allow_html=True)
-            
+    # Создаем область, где кнопки будут выводиться в ряд
+    container = st.container()
+    with container:
+        # Важно: просто выводим кнопки одну за другой БЕЗ колонок
+        for i, word in enumerate(words):
             if st.button(word, key=f"word_{i}"):
                 clean_word = word.strip(".,!?;:()")
                 translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
-                st.sidebar.success(f"**{clean_word}** = {translation}")v
+                st.sidebar.success(f"**{clean_word}** = {translation}")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
             
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Эта строка стоит у края, она вне условия if
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
