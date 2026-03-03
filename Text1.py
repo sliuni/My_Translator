@@ -10,35 +10,33 @@ langs = {k.capitalize(): v for k, v in langs_dict.items()}
 # 2. Настройка стилей (CSS)
 st.markdown("""
     <style>
-    /* ПРИНУДИТЕЛЬНО делаем контейнеры кнопок маленькими */
-    div.stButton {
-        display: inline-block !important;
+    /* 1. Заставляем колонки сжиматься до размера текста */
+    [data-testid="column"] {
         width: auto !important;
-        margin-right: -4px !important; /* Еще плотнее */
+        flex: none !important;
+        padding-left: 0px !important;
+        padding-right: 5px !important; /* Расстояние между словами */
     }
     
-    /* Убираем стандартные отступы Streamlit для кнопок */
+    /* 2. Убираем стандартные отступы контейнера колонок */
+    [data-testid="stHorizontalBlock"] {
+        gap: 0px !important;
+        justify-content: flex-start !important;
+    }
+
+    /* 3. Делаем кнопки похожими на обычный текст */
     div.stButton > button {
         border: none;
-        padding: 0px 2px !important;
+        padding: 0px !important;
         background-color: transparent;
         color: inherit;
         font-size: 18px;
         vertical-align: baseline;
-        width: auto !important; /* Чтобы кнопка не была на всю строку */
-    }
-
-    div.stButton > button:hover {
-        color: #ff4b4b;
     }
     
-    /* Убираем лишние отступы между колонками, если они остались */
-    [data-testid="column"] {
-        width: auto !important;
-        flex: none !important;
-    }
-    [data-testid="stHorizontalBlock"] {
-        gap: 0px !important;
+    div.stButton > button:hover {
+        color: #ff4b4b;
+        background-color: transparent;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -69,6 +67,7 @@ if input_text:
                 st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
