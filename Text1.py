@@ -45,16 +45,21 @@ if input_text:
     words = input_text.split()
     st.write("---")
     
-    # Весь цикл for ТОЖЕ должен быть сдвинут вправо (4 пробела)
+    # 5. Выводим слова в ряд (План Б)
+    # Создаем контейнер, который заставит всё внутри идти слева направо
+    st.markdown('<div style="display: flex; flex-wrap: wrap; align-items: baseline;">', unsafe_allow_html=True)
+    
     for i, word in enumerate(words):
         if st.button(word, key=f"btn_{i}"):
             clean_word = word.strip(".,!?;:()")
-            # Переводим на выбранный язык
             translation = GoogleTranslator(source='auto', target=langs[choice]).translate(clean_word)
             st.sidebar.success(f"**{clean_word}** = {translation}")
+            
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Эта строка стоит у края, она вне условия if
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод выше.")
+
 
 
 
