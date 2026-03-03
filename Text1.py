@@ -1,6 +1,11 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
-langs = {"Русский": "ru", "Немецкий": "de", "Французский": "fr", "Испанский": "es"}
+# 1. Получаем список всех доступных языков автоматически
+translator_instance = GoogleTranslator()
+langs_dict = translator_instance.get_supported_languages(as_dict=True)
+
+# 2. Делаем названия языков с большой буквы для красоты в меню
+langs = {k.capitalize(): v for k, v in langs_dict.items()}
 
 # Настройка стилей, чтобы кнопки выглядели как обычный текст
 st.markdown("""
@@ -50,5 +55,6 @@ if input_text:
                 st.sidebar.success(f"**{clean_word}** = {translation}")
 
 st.sidebar.info("Нажми на слово в тексте, чтобы увидеть перевод здесь.")
+
 
 
