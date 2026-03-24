@@ -1,28 +1,34 @@
 import streamlit as st
 
-# Настройка страницы (делаем ее широкой)
-st.set_page_config(layout="wide")
+# Инициализируем память для выбранного слова, если её ещё нет
+if "selected_word" not in st.session_state:
+    st.session_state.selected_word = None
 
-st.title("Smart Reading Assistant 📖")
-
-# Создаем две колонки: 
-# col1 (левая) — 70% ширины для текста и перевода
-# col2 (правая) — 30% ширины для советов ИИ
-col1, col2 = st.columns([7, 3])
+# ... (остальной код сверху остается таким же) ...
 
 with col1:
     st.header("Твой текст")
-    user_input = st.text_area("Введите предложение для разбора:", placeholder="Например: Learning Python is fun!")
+    user_input = st.text_area("Введите предложение:", placeholder="Например: Learning Python is fun!")
     
-    # Твоя прошлая логика перевода (пример)
     if user_input:
-        st.info(f"Здесь будет твой перевод по словам...")
-        # Тут мы вставим твой цикл со словами, который мы обсуждали раньше
+        st.write("---")
         words = user_input.split()
+        
+        # Создаем сетку из кнопок
         cols = st.columns(len(words))
         for i, word in enumerate(words):
-            with cols[i]:
-                st.button(word, key=f"btn_{i}")
+            # Чистим слово от знаков препинания для красоты
+            clean_word = word.strip(".,!?;:")
+            
+            # Если кнопка нажата, записываем слово в память
+            if cols[i].button(clean_word, key=f"btn_{i}"):
+                st.session_state.selected_word = clean_word
+
+        # Если в памяти есть выбранное слово — показываем его
+        if st.session_state.selected_word:
+            st.markdown(f"### Выбрано слово: **{st.session_state.selected_word}**")
+            # Сюда мы позже добавим автоматический перевод этого конкретного слова
+            st.info(f"Тут будет перевод для слова '{st.session_state.selected_word}'")
 
 with col2:
     st.header("ChatGPT AI ✨")
