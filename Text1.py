@@ -1,39 +1,46 @@
 import streamlit as st
+from openai import OpenAI
 
-# 1. Настройка страницы (должна быть самой первой командой Streamlit)
+# 1. Настройка страницы
 st.set_page_config(layout="wide", page_title="Smart Reading AI")
 
-# 2. Инициализация "памяти" приложения (Session State)
-# Это нужно, чтобы приложение помнило, какое слово мы нажали
+# --- ТВОЙ КЛЮЧ API ---
+# Вставь свой ключ между кавычками ниже
+MY_OPENAI_KEY = "ЗДЕСЬ_ТВОЙ_КЛЮЧ_API" 
+
+# Инициализация клиента OpenAI
+client = OpenAI(api_key=MY_OPENAI_KEY)
+
+# 2. Память приложения
 if "selected_word" not in st.session_state:
     st.session_state.selected_word = None
 
 st.title("Smart Reading Assistant 📖")
 
-# 3. Создание колонок: левая (70%) и правая (30%)
-col1, col2 = st.columns([7, 3])
+# 3. Создание колонок
+col1, col2 = st.columns([6, 4])
 
 # --- ЛЕВАЯ КОЛОНКА ---
 with col1:
     st.header("Твой текст")
-    user_input = st.text_area("Введите предложение для разбора:", 
-                              placeholder="Например: I am learning Python step by step",
+    user_input = st.text_area("Введите текст для разбора:", 
+                              placeholder="Например: Ich lerne Python Schritt für Schritt",
                               height=150)
     
     if user_input:
-        st.write("### Нажми на слово для анализа:")
+        st.write("### Нажми на слово:")
+        
+        # Чтобы не было "водопада", используем flex-контейнер через HTML
+        # Но для простоты в Streamlit сделаем вывод слов кнопками в один ряд
         words = user_input.split()
         
-        # Рисуем кнопки для каждого слова
-        # Используем контейнер, чтобы кнопки шли в ряд, если их много
-        word_buttons_container = st.container()
-        word_cols = st.columns(len(words) if len(words) > 0 else 1)
-        
+        # Создаем контейнер для кнопок, чтобы они не растягивались на весь экран
+        cols = st.columns(10) # Фиксируем 10 колонок, чтобы они были компактными
         for i, word in enumerate(words):
             clean_word = word.strip(".,!?;:()\"")
-            # Если кнопка нажата, записываем слово в "память"
-            if word_cols[i].button(clean_word, key=f"btn_{i}"):
-                st.session_state.selected_word = clean_word
+            with cols[i % 10]: # Распределяем слова по 10 в ряд
+                if st.button(clean_word, key=f"btn_{i}"):
+                    st.session_state.selected_word = clean_word
 
 # --- ПРАВАЯ КОЛОНКА ---
 with col2:
@@ -41,40 +48,46 @@ with col2:
     st.write("---")
     
     if st.session_state.selected_word:
-        st.subheader(f"Анализ слова: `{st.session_state.selected_word}`")
+        st.subheader(f"Разбор слова: `{st.session_state.selected_word}`")
         
-        with st.spinner('ИИ готовит объяснение...'):
-            # Это блок-заглушка. Когда подключим API, здесь будет реальный ответ
-            st.info(f"Здесь появится подробный разбор слова **{st.session_state.selected_word}**.")
-            st.write(f"**Контекст:** Ты выбрал это слово из своего текста.")
-            st.write("---")
-            st.write("🤖 *ИИ подсказка:* Чтобы получить реальный ответ от GPT, нам нужно вставить твой API Key в код.")
-            
-        # Кнопка для сброса выбора
+        with st.spinner('Спрашиваю у нейросети...'):
+            try:
+                # ЗАПРОС К CHATGPT
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo", # Или gpt-4o если есть доступ
+                    messages=[
+                        {"role": "system", "content": "Ты учитель иностранных языков. Кратко переведи слово и объясни его грамматическую роль в предложении."},
+                        {"role": "user", "content": f"Объясни слово '{st.session_state.selected_word}' из текста: {user_input}"}
+                    ],
+                    max_tokens=150
+                )
+                
+                # Выводим реальный ответ
+                answer = response.choices[0].message.content
+                st.write(answer)
+                
+            except Exception as e:
+                st.error("Ошибка подключения к ИИ!")
+                st.info("Проверь свой API Key или баланс на аккаунте OpenAI.")
+                st.caption(f"Техническая инфо: {e}")
+        
         if st.button("Очистить выбор"):
             st.session_state.selected_word = None
             st.rerun()
     else:
-        st.info("Выбери слово слева, чтобы ИИ объяснил его значение или грамматику.")
+        st.info("Нажми на слово слева, чтобы ИИ проанализировал его.")
 
-# 4. Немного красоты (CSS)
+# 4. Стили (исправляем "водопад" и внешний вид)
 st.markdown("""
     <style>
     div[data-testid="column"] {
-        padding: 20px;
-        border: 1px solid #e6e9ef;
-        border-radius: 15px;
-        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 10px;
     }
     .stButton>button {
-        width: 100%;
-        border-radius: 5px;
-        border: 1px solid #ff4b4b;
-        color: #ff4b4b;
-    }
-    .stButton>button:hover {
-        background-color: #ff4b4b;
-        color: white;
+        padding: 2px 5px;
+        font-size: 14px;
+        margin-bottom: 5px;
     }
     </style>
     """, unsafe_allow_html=True)
