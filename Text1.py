@@ -8,7 +8,6 @@ st.set_page_config(layout="wide", page_title="Smart Reading AI")
 MY_OPENAI_KEY = "ЗДЕСЬ_ТВОЙ_КЛЮЧ_API" 
 
 # Инициализация клиента OpenAI
-client = OpenAI(api_key=MY_OPENAI_KEY)
 
 # 2. Память приложения
 if "selected_word" not in st.session_state:
