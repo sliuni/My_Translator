@@ -2,16 +2,19 @@ import streamlit as st
 import google.generativeai as genai
 
 # 1. Настройка страницы
-st.set_page_config(layout="wide", page_title="Smart Reading Assistant")
+st.set_page_config(layout="wide", page_title="Smart Reading AI")
 
 # Проверка наличия ключа в Secrets
 if "GEMINI_API_KEY" not in st.secrets:
-    st.error("⚠️ Ключ не найден в Secrets! Добавь GEMINI_API_KEY в настройках Streamlit Cloud.")
+    st.error("⚠️ Ключ не найден в Secrets! Проверь настройки на share.streamlit.io")
     st.stop()
 
 # Настройка Gemini
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-1.5-flash')
+try:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    model = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error(f"Ошибка настройки ИИ: {e}")
 
 # Память для выбранного слова
 if "selected_word" not in st.session_state:
@@ -30,9 +33,10 @@ with col_left:
     
     if user_text:
         st.write("### Нажми на слово:")
+        # Используем split() без параметров, чтобы он убирал лишние пробелы и переносы
         words = user_text.split()
         
-        # Группируем кнопки по 6 в ряд, чтобы не было "водопада"
+        # Группируем кнопки по 5-6 штук в ряд
         row_size = 6
         for i in range(0, len(words), row_size):
             cols = st.columns(row_size)
@@ -49,28 +53,56 @@ with col_right:
     if st.session_state.selected_word:
         st.subheader(f"Слово: `{st.session_state.selected_word}`")
         
-        with st.spinner('Gemini думает...'):
+        with st.spinner('Gemini анализирует...'):
             try:
+                # Четкий промпт для лучшего результата
                 prompt = f"""
-                Ты учитель. Переведи слово '{st.session_state.selected_word}' на русский.
-                Объясни его роль в предложении: '{user_text}'.
-                Пиши кратко.
+                Ты профессиональный учитель иностранных языков. 
+                1. Переведи слово '{st.session_state.selected_word}' на русский.
+                2. Объясни грамматику этого слова в контексте предложения: '{user_text}'.
+                3. Дай один короткий пример использования.
+                Пиши кратко и только по делу.
                 """
                 response = model.generate_content(prompt)
-                st.write(response.text)
+                
+                if response.text:
+                    st.write(response.text)
+                else:
+                    st.warning("ИИ вернул пустой ответ. Попробуй другое слово.")
+                    
             except Exception as e:
-                st.error("Проблема с запросом к ИИ.")
+                st.error("Ошибка при связи с ИИ.")
+                st.caption(f"Техническая деталь: {e}")
         
-        if st.button("Очистить"):
+        if st.button("Очистить выбор"):
             st.session_state.selected_word = None
             st.rerun()
     else:
-        st.info("Нажми на слово слева.")
+        st.info("Нажми на слово слева, чтобы получить разбор.")
 
-# Стили (делаем кнопки красивыми)
+# 3. Красивые стили
 st.markdown("""
     <style>
-    .stButton>button { width: 100%; font-size: 14px; margin-bottom: 5px; border-radius: 8px; }
-    div[data-testid="column"] { border: 1px solid #f0f2f6; padding: 15px; border-radius: 12px; background-color: #fafafa; }
+    /* Делаем кнопки одинаковыми и красивыми */
+    .stButton>button {
+        width: 100%;
+        border-radius: 10px;
+        background-color: #ffffff;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        font-weight: 500;
+    }
+    .stButton>button:hover {
+        border-color: #ff4b4b;
+        color: #ff4b4b;
+        background-color: #fff5f5;
+    }
+    /* Рамки для колонок */
+    div[data-testid="column"] {
+        padding: 20px;
+        border-radius: 15px;
+        background-color: #f9fafb;
+        border: 1px solid #f3f4f6;
+    }
     </style>
     """, unsafe_allow_html=True)
