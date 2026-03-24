@@ -2,79 +2,97 @@ import streamlit as st
 import google.generativeai as genai
 
 # 1. Настройка страницы
-st.set_page_config(layout="wide", page_title="Smart Reading Assistant")
+st.set_page_config(layout="wide", page_title="Smart Reading AI")
 
-# Проверка ключа в Secrets
+# Проверка ключа (уже должен работать через твой Secrets)
 if "GEMINI_API_KEY" not in st.secrets:
-    st.error("⚠️ Ключ не найден в Secrets! Сначала исправь ошибку в настройках Streamlit.")
+    st.error("⚠️ Ключ не найден! Проверь настройки Secrets в Streamlit.")
     st.stop()
 
-# Настройка Gemini
+# Инициализация Gemini
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# 2. Инициализация памяти приложения
+# Память для кликов
 if "selected_word" not in st.session_state:
     st.session_state.selected_word = None
 
 st.title("Smart Reading Assistant 📖")
 
-# 3. Создание колонок: Левая для текста, Правая для ИИ
-col_text, col_ai = st.columns([6, 4])
+# 2. Колонки
+col_left, col_right = st.columns([6, 4])
 
-with col_text:
+with col_left:
     st.header("Твой текст")
-    user_input = st.text_area("Вставь текст (например, на немецком):", 
-                              placeholder="Ich wohne в Ludwigshafen...",
+    user_text = st.text_area("Вставь текст (немецкий, английский и др.):", 
+                              placeholder="Ich lerne Python каждый день...",
                               height=200)
     
-    if user_input:
+    if user_text:
         st.write("### Нажми на слово для разбора:")
-        words = user_input.split()
         
-        # Группируем кнопки, чтобы они не падали в "водопад"
-        # Создаем контейнер для кнопок
-        container = st.container()
-        row_size = 7 # Количество слов в одной строке
+        # Разбиваем текст на слова
+        words = user_text.split()
+        
+        # Чтобы не было "водопада", используем "плитку" из кнопок
+        # Делаем сетку (например, по 5 слов в строке)
+        row_size = 5
         for i in range(0, len(words), row_size):
             cols = st.columns(row_size)
             row_words = words[i:i + row_size]
             for j, word in enumerate(row_words):
+                # Очищаем слово от мусора
                 clean_word = word.strip(".,!?;:()\"")
                 if cols[j].button(clean_word, key=f"btn_{i+j}"):
                     st.session_state.selected_word = clean_word
 
-with col_ai:
-    st.header("Gemini AI ✨")
+with col_right:
+    st.header("Разбор от Gemini ✨")
     st.write("---")
     
     if st.session_state.selected_word:
-        st.subheader(f"Слово: `{st.session_state.selected_word}`")
+        st.info(f"Выбрано слово: **{st.session_state.selected_word}**")
         
-        with st.spinner('Gemini анализирует...'):
+        with st.spinner('ИИ анализирует...'):
             try:
-                # Промпт для учителя
+                # Промпт для ИИ
                 prompt = f"""
-                Ты профессиональный лингвист и учитель. 
-                Дай перевод слова '{st.session_state.selected_word}' на русский.
-                Объясни его грамматическую форму в этом контексте: '{user_input}'.
-                Пиши кратко, 3-4 предложения.
+                Ты профессиональный лингвист. 
+                1. Переведи слово '{st.session_state.selected_word}' на русский.
+                2. Объясни его грамматику (падеж, время, род и т.д.) в предложении: '{user_text}'.
+                3. Дай еще один простой пример с этим словом.
+                Пиши кратко и понятно.
                 """
                 response = model.generate_content(prompt)
                 st.write(response.text)
             except Exception as e:
-                st.error(f"Произошла ошибка: {e}")
+                st.error("Ошибка при получении ответа. Возможно, превышены лимиты или ключ не активен.")
         
         if st.button("Очистить"):
             st.session_state.selected_word = None
             st.rerun()
     else:
-        st.info("Выбери слово слева, чтобы получить объяснение от ИИ.")
+        st.write("Нажми на любое слово слева, и я объясню его значение и грамматику.")
 
-# Стили для аккуратного вида
+# 3. Красивое оформление
 st.markdown("""
     <style>
-    .stButton>button { width: 100%; font-size: 14px; margin-bottom: 5px; }
-    div[data-testid="column"] { border: 1px solid #f0f2f6; padding: 15px; border-radius: 12px; background-color: #fdfdfd; }
+    .stButton>button {
+        width: 100%;
+        border-radius: 10px;
+        background-color: #f0f2f6;
+        border: 1px solid #d1d5db;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        border-color: #ff4b4b;
+        color: #ff4b4b;
+    }
+    div[data-testid="column"] {
+        padding: 20px;
+        background-color: #fafafa;
+        border-radius: 15px;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+    }
     </style>
     """, unsafe_allow_html=True)
