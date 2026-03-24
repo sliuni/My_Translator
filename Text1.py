@@ -1,24 +1,28 @@
 import streamlit as st
+import google.generativeai as genai
 
 # 1. Настройка страницы
-st.set_page_config(layout="wide", page_title="Smart Reading AI")
+st.set_page_config(layout="wide", page_title="Smart Reading AI (Gemini)")
 
-# --- ТВОЙ КЛЮЧ API ---
-# Вставь свой ключ между кавычками ниже
-MY_OPENAI_KEY = "ЗДЕСЬ_ТВОЙ_КЛЮЧ_API" 
+# БЕЗОПАСНОЕ ПОДКЛЮЧЕНИЕ КЛЮЧА GEMINI
+# В настройках Streamlit Secrets назови ключ GEMINI_API_KEY
+if "GEMINI_API_KEY" not in st.secrets:
+    st.error("Ошибка: Ключ GEMINI_API_KEY не найден в Secrets!")
+    st.stop()
 
-# Инициализация клиента OpenAI
+# Настройка Gemini
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 # 2. Память приложения
 if "selected_word" not in st.session_state:
     st.session_state.selected_word = None
 
-st.title("Smart Reading Assistant 📖")
+st.title("Smart Reading Assistant (Gemini Edition) 📖")
 
 # 3. Создание колонок
 col1, col2 = st.columns([6, 4])
 
-# --- ЛЕВАЯ КОЛОНКА ---
 with col1:
     st.header("Твой текст")
     user_input = st.text_area("Введите текст для разбора:", 
@@ -27,65 +31,52 @@ with col1:
     
     if user_input:
         st.write("### Нажми на слово:")
-        
-        # Чтобы не было "водопада", используем flex-контейнер через HTML
-        # Но для простоты в Streamlit сделаем вывод слов кнопками в один ряд
         words = user_input.split()
         
-        # Создаем контейнер для кнопок, чтобы они не растягивались на весь экран
-        cols = st.columns(10) # Фиксируем 10 колонок, чтобы они были компактными
-        for i, word in enumerate(words):
-            clean_word = word.strip(".,!?;:()\"")
-            with cols[i % 10]: # Распределяем слова по 10 в ряд
-                if st.button(clean_word, key=f"btn_{i}"):
+        # Группируем кнопки по 8 штук в ряд
+        row_size = 8
+        for i in range(0, len(words), row_size):
+            row_words = words[i:i + row_size]
+            cols = st.columns(row_size)
+            for j, word in enumerate(row_words):
+                clean_word = word.strip(".,!?;:()\"")
+                if cols[j].button(clean_word, key=f"btn_{i+j}"):
                     st.session_state.selected_word = clean_word
 
-# --- ПРАВАЯ КОЛОНКА ---
 with col2:
-    st.header("ChatGPT AI ✨")
+    st.header("Gemini AI ✨")
     st.write("---")
     
     if st.session_state.selected_word:
         st.subheader(f"Разбор слова: `{st.session_state.selected_word}`")
         
-        with st.spinner('Спрашиваю у нейросети...'):
+        with st.spinner('Gemini думает...'):
             try:
-                # ЗАПРОС К CHATGPT
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo", # Или gpt-4o если есть доступ
-                    messages=[
-                        {"role": "system", "content": "Ты учитель иностранных языков. Кратко переведи слово и объясни его грамматическую роль в предложении."},
-                        {"role": "user", "content": f"Объясни слово '{st.session_state.selected_word}' из текста: {user_input}"}
-                    ],
-                    max_tokens=150
-                )
+                # ЗАПРОС К GEMINI
+                prompt = f"""
+                Ты учитель иностранных языков. 
+                Кратко переведи слово '{st.session_state.selected_word}' на русский язык 
+                и объясни его грамматическую роль в предложении: '{user_input}'.
+                Пиши кратко и понятно.
+                """
+                response = model.generate_content(prompt)
                 
-                # Выводим реальный ответ
-                answer = response.choices[0].message.content
-                st.write(answer)
+                st.write(response.text)
                 
             except Exception as e:
-                st.error("Ошибка подключения к ИИ!")
-                st.info("Проверь свой API Key или баланс на аккаунте OpenAI.")
-                st.caption(f"Техническая инфо: {e}")
+                st.error("Ошибка API Gemini.")
+                st.caption(f"Подробности: {e}")
         
         if st.button("Очистить выбор"):
             st.session_state.selected_word = None
             st.rerun()
     else:
-        st.info("Нажми на слово слева, чтобы ИИ проанализировал его.")
+        st.info("Нажми на слово слева, чтобы Gemini проанализировал его.")
 
-# 4. Стили (исправляем "водопад" и внешний вид)
+# 4. Стили для кнопок и колонок
 st.markdown("""
     <style>
-    div[data-testid="column"] {
-        padding: 15px;
-        border-radius: 10px;
-    }
-    .stButton>button {
-        padding: 2px 5px;
-        font-size: 14px;
-        margin-bottom: 5px;
-    }
+    .stButton>button { width: 100%; font-size: 12px; padding: 2px; }
+    div[data-testid="column"] { border: 1px solid #f0f2f6; padding: 15px; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
