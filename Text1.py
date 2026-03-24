@@ -1,5 +1,4 @@
 import streamlit as st
-from openai import OpenAI
 
 # 1. Настройка страницы
 st.set_page_config(layout="wide", page_title="Smart Reading AI")
